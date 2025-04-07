@@ -3,12 +3,14 @@ const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
 const prettier = require("eslint-config-prettier");
+const prettierPlugin = require("eslint-plugin-prettier");
+const esLintPluginTemplate = require("@angular-eslint/eslint-plugin-template");
 
 module.exports = tseslint.config(
   {
     files: ["**/*.ts"],
     plugins: {
-      prettier: require("eslint-plugin-prettier"),
+      prettier: prettierPlugin,
     },
     languageOptions: {
       parserOptions: {
@@ -40,7 +42,23 @@ module.exports = tseslint.config(
     extends: [
       ...angular.configs.templateRecommended,
       ...angular.configs.templateAccessibility,
+      prettier,
     ],
-    rules: {},
+    rules: {}
+  },
+  {
+    files: ['**/*.html'],
+    extends: [
+      ...angular.configs.templateRecommended,
+      ...angular.configs.templateAccessibility,
+      prettier,
+    ],
+    plugins: {
+      '@angular-eslint/template': esLintPluginTemplate,
+      prettier: prettierPlugin
+    },
+    rules: {
+      'prettier/prettier': ['error', { parser: 'angular' }]
+    }
   }
 );
