@@ -1,0 +1,277 @@
+<div class="tw-flex tw-justify-center">
+  <div class="tw-container tw-px-4 tw-flex-1">
+    <div class="tw-flex tw-justify-center tw-items-center">
+      @if (!isReservationInitiated) {
+        <p-button
+          label="Begin Your Reservation"
+          (onClick)="initReservation()"
+          class="tw-mb-4"
+        ></p-button>
+      }
+    </div>
+
+    <div class="tw-flex tw-justify-center">
+      @if (isReservationInitiated) {
+        <p-stepper
+          [value]="currentStep"
+          class="tw-flex tw-flex-col tw-max-w-5xl tw-w-full"
+          [linear]="true"
+          [formGroup]="form"
+        >
+          <p-step-list>
+            <p-step [value]="1">Date & Time</p-step>
+            <p-step [value]="2">Guests & Preferences</p-step>
+            <p-step [value]="3">Seating Preferences</p-step>
+            <p-step [value]="4">Personal Information</p-step>
+          </p-step-list>
+
+          <div class="tw-flex tw-flex-col tw-flex-grow tw-min-h-[600px]">
+            <p-step-panels class="tw-flex-grow tw-flex tw-flex-col tw-justify-center">
+              <p-step-panel
+                class="!tw-bg-transparent !tw-overflow-visible"
+                [value]="1"
+              >
+                <ng-template #content>
+                  <div class="tw-h-full tw-flex tw-flex-col tw-gap-4 tw-items-center tw-justify-center">
+                    <div class="tw-max-w-md tw-w-full">
+                      <p-datePicker
+                        formControlName="date"
+                        dateFormat="mm/dd/yy"
+                        styleClass="tw-w-full"
+                        [showButtonBar]="true"
+                        [showIcon]="true"
+                        [inline]="true"
+                      ></p-datePicker>
+                      @if (form.get('date')?.invalid && form.get('date')?.touched) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2 tw-mb-4">Please select a date</small>
+                      }
+                    </div>
+                    <div class="tw-max-w-md tw-w-full">
+                      <p-select
+                        formControlName="time"
+                        [options]="timeSlotsOptions"
+                        placeholder="Select Time Slot"
+                        class="tw-w-full"
+                      />
+                      @if (form.get('time')?.invalid && form.get('time')?.touched) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2 tw-mb-4">Please select a time</small>
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </p-step-panel>
+
+              <p-step-panel
+                class="!tw-bg-transparent !tw-overflow-visible"
+                [value]="2"
+              >
+                <ng-template #content>
+                  <div class="tw-h-full tw-flex tw-flex-col tw-items-center">
+                    <div class="tw-max-w-md tw-w-full tw-mb-6">
+                      <label
+                        class="tw-block tw-mb-2"
+                        for="adults"
+                      >
+                        Adults
+                      </label>
+                      <p-select
+                        id="adults"
+                        formControlName="adults"
+                        [options]="guestsOptions"
+                        placeholder="Select adults"
+                        class="tw-w-full"
+                      />
+                      @if (form.get('adults')?.invalid && form.get('adults')?.touched) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2">Please select number of adults (min 1)</small>
+                      }
+                    </div>
+                    <div class="tw-max-w-md tw-w-full tw-mb-8">
+                      <label
+                        class="tw-block tw-mb-2"
+                        for="children"
+                      >
+                        Children
+                      </label>
+                      <p-select
+                        id="children"
+                        formControlName="children"
+                        [options]="guestsOptions"
+                        placeholder="Select children"
+                        class="tw-w-full"
+                      />
+                      @if (form.get('children')?.invalid && form.get('children')?.touched) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2">Please select number of children</small>
+                      }
+                    </div>
+                    <div class="tw-max-w-md tw-w-full">
+                      <div class="tw-flex tw-items-center tw-mb-8">
+                        <p-checkbox
+                          id="isSmoking"
+                          formControlName="isSmoking"
+                          binary
+                          class="tw-mr-2"
+                        />
+                        <label
+                          class="tw-block tw-m-0"
+                          for="isSmoking"
+                        >
+                          Smoking requested
+                        </label>
+                      </div>
+
+                      <div class="tw-flex tw-items-center tw-mb-4">
+                        <p-checkbox
+                          id="isBirthday"
+                          formControlName="isBirthday"
+                          binary
+                          class="tw-mr-2"
+                        />
+                        <label
+                          class="tw-block tw-m-0"
+                          for="isBirthday"
+                        >
+                          Birthday celebration
+                        </label>
+                      </div>
+
+                      @if (form.get('isBirthday')?.value) {
+                        <div class="tw-mb-4">
+                          <input
+                            pInputText
+                            formControlName="birthdayName"
+                            placeholder="Name of the birthday person (optional)"
+                            class="tw-w-full tw-mb-4"
+                          />
+                          @if (form.get('birthdayName')?.invalid && form.get('birthdayName')?.touched) {
+                            <small class="tw-text-red-500 tw-block tw-mb-4">
+                              Please enter the birthday person's name
+                            </small>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </p-step-panel>
+
+              <p-step-panel
+                class="!tw-bg-transparent !tw-overflow-visible"
+                [value]="3"
+              >
+                <ng-template #content>
+                  <div class="tw-h-full tw-flex tw-flex-col tw-items-center">
+                    <div class="tw-max-w-md tw-w-full">
+                      @for (region of regions; track region.value) {
+                        <div class="tw-flex tw-items-center tw-mb-8">
+                          <p-radioButton
+                            formControlName="region"
+                            [inputId]="region.value"
+                            [value]="region.value"
+                          />
+                          <label
+                            class="tw-block tw-ml-4"
+                            [for]="region.value"
+                          >
+                            {{ region.label }}
+                          </label>
+                        </div>
+                      }
+                      @if (form.get('region')?.invalid && form.get('region')?.touched) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2">Please select a region</small>
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </p-step-panel>
+              <p-step-panel
+                class="!tw-bg-transparent !tw-overflow-visible"
+                [value]="4"
+              >
+                <ng-template #content>
+                  <div class="tw-h-full tw-flex tw-flex-col tw-items-center">
+                    <div class="tw-max-w-md tw-w-full">
+                      <div class="tw-mb-8">
+                        <label
+                          class="tw-block tw-mb-2"
+                          for="name"
+                        >
+                          Name
+                        </label>
+                        <input
+                          pInputText
+                          formControlName="name"
+                          placeholder="John Doe"
+                          class="tw-w-full"
+                        />
+                        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                          <small class="tw-text-red-500 tw-block tw-mt-2">Please enter your name</small>
+                        }
+                      </div>
+                      <div class="tw-mb-8">
+                        <label
+                          class="tw-block tw-mb-2"
+                          for="email"
+                        >
+                          Email
+                        </label>
+                        <input
+                          pInputText
+                          formControlName="email"
+                          placeholder="john.doe@example.com"
+                          class="tw-w-full"
+                        />
+                        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                          <small class="tw-text-red-500 tw-block tw-mt-2">Please enter a valid email</small>
+                        }
+                      </div>
+                      <div>
+                        <label
+                          class="tw-block tw-mb-2"
+                          for="phone"
+                        >
+                          Phone number
+                        </label>
+                        <input
+                          pInputText
+                          formControlName="phone"
+                          placeholder="+34 123 456 789"
+                          class="tw-w-full"
+                        />
+                        @if (form.get('phone')?.invalid && form.get('phone')?.touched) {
+                          <small class="tw-text-red-500 tw-block tw-mt-2">
+                            Please enter a valid phone number (format: +XX XXXXXXXXX)
+                          </small>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-step-panel>
+            </p-step-panels>
+
+            <div class="tw-flex tw-justify-between tw-mt-auto tw-pt-6 tw-max-w-md tw-w-full tw-mx-auto">
+              <p-button
+                label="Back"
+                severity="secondary"
+                [disabled]="currentStep === 1"
+                (onClick)="goToPreviousStep()"
+              ></p-button>
+              @if (currentStep < 4) {
+                <p-button
+                  label="Next"
+                  (onClick)="goToNextStep()"
+                ></p-button>
+              }
+              @if (currentStep === 4) {
+                <p-button
+                  label="Submit"
+                  (onClick)="submitForm()"
+                ></p-button>
+              }
+            </div>
+          </div>
+        </p-stepper>
+      }
+    </div>
+  </div>
+</div>
