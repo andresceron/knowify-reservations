@@ -19,7 +19,6 @@ module.exports = tseslint.config(
     },
     rules: {
       ...prettier.rules,
-      "prettier/prettier": "error",
       "@angular-eslint/directive-selector": [
         "error",
         { type: "attribute", prefix: "app", style: "camelCase" },
@@ -27,6 +26,20 @@ module.exports = tseslint.config(
       "@angular-eslint/component-selector": [
         "error",
         { type: "element", prefix: "app", style: "kebab-case" },
+      ],
+      "array-element-newline": [
+        "error",
+        "consistent"
+      ],
+      "array-bracket-newline": [
+        "error",
+        {
+          "multiline": true
+        }
+      ],
+      "array-bracket-spacing": [
+        "error",
+        "never"
       ],
     },
     processor: angular.processInlineTemplates,
