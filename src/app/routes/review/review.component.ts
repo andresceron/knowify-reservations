@@ -39,6 +39,6 @@ export class ReviewComponent implements OnInit {
   }
 
   editReservation(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/reservation']);
   }
 }
