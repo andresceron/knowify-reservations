@@ -38,6 +38,8 @@
                         formControlName="date"
                         dateFormat="mm/dd/yy"
                         styleClass="tw-w-full"
+                        [minDate]="dateAvailability.startDate"
+                        [maxDate]="dateAvailability.endDate"
                         [showButtonBar]="true"
                         [showIcon]="true"
                         [inline]="true"

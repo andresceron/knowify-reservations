@@ -7,10 +7,10 @@ export interface ReservationData {
   name: string;
   email: string;
   phone: string;
-  size: number;
-  region: RegionType;
+  adults: number;
   children: number;
   isSmoking: boolean;
   isBirthday: boolean;
   birthdayName?: string;
+  region: RegionType;
 }

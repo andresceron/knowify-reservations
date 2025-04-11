@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { parse } from 'date-fns';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -10,6 +11,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { StepperModule } from 'primeng/stepper';
 import { TIME_SLOT_OPTIONS } from '../../shared/types/time-slot.type';
 import { REGION_OPTIONS } from '../../shared/types/region.type';
+import { ReservationStateService } from '../../shared/services/reservation.state.service';
+import { Router } from '@angular/router';
+import { AVAILABILITY_DATE_RANGE } from '../../shared/types/date-availability';
 
 @Component({
   selector: 'app-reservation',
@@ -31,27 +35,40 @@ export class ReservationComponent implements OnInit {
   public form!: FormGroup;
   public regions = REGION_OPTIONS;
   public timeSlotsOptions = TIME_SLOT_OPTIONS;
+  public dateAvailability = AVAILABILITY_DATE_RANGE;
   public guestsOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   public isReservationInitiated = false;
   public currentStep = 0;
 
-  constructor(private fb: FormBuilder) {
+
+  constructor(
+    private fb: FormBuilder,
+    private reservationState: ReservationStateService,
+    private router: Router,
+  ) {
   }
 
   public ngOnInit(): void {
+    const existingReservation = this.reservationState.reservation();
+    const dateObj = existingReservation?.date ? parse(existingReservation.date, 'yyyy-MM-dd', new Date()) : null;
+
     this.form = this.fb.group({
-      date: [null, Validators.required],
-      time: [null, Validators.required],
-      adults: [null, [Validators.required, Validators.min(1), Validators.max(12)]],
-      children: [null, [Validators.required, Validators.min(0), Validators.max(12)]],
-      region: [null, Validators.required],
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern(/^\+[0-9\s]{8,15}$/)]],
-      isSmoking: [false],
-      isBirthday: [false],
-      birthdayName: [''],
+      date: [dateObj, Validators.required],
+      time: [existingReservation?.time || null, Validators.required],
+      adults: [existingReservation?.adults || null, [Validators.required, Validators.min(1), Validators.max(12)]],
+      children: [existingReservation?.children || null, [Validators.required, Validators.min(0), Validators.max(12)]],
+      region: [existingReservation?.region || null, Validators.required],
+      name: [existingReservation?.name || '', Validators.required],
+      email: [existingReservation?.email || '', [Validators.required, Validators.email]],
+      phone: [existingReservation?.phone || '', [Validators.required, Validators.pattern(/^\+[0-9\s]{8,15}$/)]],
+      isSmoking: [existingReservation?.isSmoking || false],
+      isBirthday: [existingReservation?.isBirthday || false],
+      birthdayName: [existingReservation?.birthdayName || ''],
     });
+
+    if (existingReservation) {
+      this.initReservation();
+    }
   }
 
   public initReservation(): void {
@@ -77,7 +94,8 @@ export class ReservationComponent implements OnInit {
 
   public submitForm(): void {
     if (this.form.valid) {
-      console.log('Form submitted');
+      this.reservationState.setReservation(this.form.value);
+      this.router.navigate(['/review']);
     } else {
       this.form.markAllAsTouched();
     }
