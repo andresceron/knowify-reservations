@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { parse } from 'date-fns';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -14,6 +14,8 @@ import { REGION_OPTIONS } from '../../shared/types/region.type';
 import { ReservationStateService } from '../../shared/services/reservation.state.service';
 import { Router } from '@angular/router';
 import { AVAILABILITY_DATE_RANGE } from '../../shared/types/date-availability';
+import { GuestValidators } from '../../shared/validators/guest-validators';
+import { MAX_TOTAL_GUESTS } from '../../shared/constants/global.constants';
 
 @Component({
   selector: 'app-reservation',
@@ -39,7 +41,8 @@ export class ReservationComponent implements OnInit {
   public guestsOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   public isReservationInitiated = false;
   public currentStep = 0;
-
+  public maxTotalGuests = MAX_TOTAL_GUESTS;
+  public noRegionsAvailable = false;
 
   constructor(
     private fb: FormBuilder,
@@ -64,7 +67,7 @@ export class ReservationComponent implements OnInit {
       isSmoking: [existingReservation?.isSmoking || false],
       isBirthday: [existingReservation?.isBirthday || false],
       birthdayName: [existingReservation?.birthdayName || ''],
-    });
+    }, { validators: GuestValidators.maxTotalGuests(this.maxTotalGuests) });
 
     if (existingReservation) {
       this.initReservation();
@@ -86,6 +89,10 @@ export class ReservationComponent implements OnInit {
     if (this.validateCurrentStep()) {
       if (this.currentStep < 4) {
         this.currentStep++;
+
+        if (this.currentStep === 3) {
+          this.updateRegionAvailability();
+        }
       }
     } else {
       this.markCurrentStepAsTouched();
@@ -111,7 +118,8 @@ export class ReservationComponent implements OnInit {
       case 2:
         return (
           this.form.get('adults')?.valid &&
-          this.form.get('children')?.valid
+          this.form.get('children')?.valid &&
+          !this.form.hasError('maxTotalGuestsExceeded')
         ) ?? false;
       case 3:
         return this.form.get('region')?.valid ?? false;
@@ -145,5 +153,26 @@ export class ReservationComponent implements OnInit {
         this.form.get('phone')?.markAsTouched();
         break;
     }
+  }
+
+  get hasMaxTotalGuestsError(): boolean {
+    return this.form.hasError('maxTotalGuestsExceeded');
+  }
+
+  private updateRegionAvailability(): void {
+    const hasChildren = this.form.get('children')?.value > 0;
+    const isSmoking = this.form.get('isSmoking')?.value;
+    const regionControl = this.form.get('region') as FormControl;
+
+    this.regions.forEach(region => {
+      const isAvailable = (!hasChildren || region.allowChildren) && (!isSmoking || region.allowSmoking);
+      region.disabled = !isAvailable;
+
+      if (regionControl.value === region.value && !isAvailable) {
+        regionControl.setValue(null);
+      }
+    });
+
+    this.noRegionsAvailable = !this.regions.some(region => !region.disabled);
   }
 }

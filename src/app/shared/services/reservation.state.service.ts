@@ -1,6 +1,9 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { ReservationData } from '../interfaces/reservation.interface';
 import { format, isDate } from 'date-fns';
+import { REGION_OPTIONS } from '../types/region.type';
+import { Region } from '../interfaces/region.interface';
+import { MAX_TOTAL_GUESTS } from '../constants/global.constants';
 
 @Injectable({ providedIn: 'root' })
 export class ReservationStateService {
@@ -20,11 +23,27 @@ export class ReservationStateService {
     this._reservation.set(null);
   }
 
+  public getAvailableRegions(hasChildren: boolean, isSmoking: boolean): Region[] {
+    return REGION_OPTIONS.filter(region => {
+      if (hasChildren && !region.allowChildren) {
+        return false;
+      }
+
+      if (isSmoking && !region.allowSmoking) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
   readonly isValid = computed(() => {
     const r = this._reservation();
     if (!r) {
-      return false
+      return false;
     }
+
+    const totalGuests = (r.adults || 0) + (r.children || 0);
 
     return (
       !!r.date &&
@@ -34,6 +53,7 @@ export class ReservationStateService {
       !!r.phone &&
       r.adults > 0 && r.adults <= 12 &&
       r.children >= 0 && r.children <= 12 &&
+      totalGuests <= MAX_TOTAL_GUESTS &&
       (!r.isBirthday || (r.isBirthday && r.birthdayName !== ''))
     );
   });

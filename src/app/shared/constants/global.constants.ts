@@ -1,0 +1,1 @@
+export const MAX_TOTAL_GUESTS = 12;

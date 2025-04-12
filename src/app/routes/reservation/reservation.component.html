@@ -104,6 +104,12 @@
                       @if (form.get('children')?.invalid && form.get('children')?.touched) {
                         <small class="tw-text-red-500 tw-block tw-mt-2">Please select number of children</small>
                       }
+                      @if (hasMaxTotalGuestsError) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2">
+                          The total number of guests can't exceed {{ maxTotalGuests }}. (currently:
+                          {{ form.getError('maxTotalGuestsExceeded')?.current }})
+                        </small>
+                      }
                     </div>
                     <div class="tw-max-w-md tw-w-full">
                       <div class="tw-flex tw-items-center tw-mb-8">
@@ -163,23 +169,28 @@
                 <ng-template #content>
                   <div class="tw-h-full tw-flex tw-flex-col tw-items-center">
                     <div class="tw-max-w-md tw-w-full">
-                      @for (region of regions; track region.value) {
-                        <div class="tw-flex tw-items-center tw-mb-8">
-                          <p-radioButton
-                            formControlName="region"
-                            [inputId]="region.value"
-                            [value]="region.value"
-                          />
-                          <label
-                            class="tw-block tw-ml-4"
-                            [for]="region.value"
-                          >
-                            {{ region.label }}
-                          </label>
-                        </div>
-                      }
-                      @if (form.get('region')?.invalid && form.get('region')?.touched) {
-                        <small class="tw-text-red-500 tw-block tw-mt-2">Please select a region</small>
+                      @if (noRegionsAvailable) {
+                        <small class="tw-text-red-500 tw-block tw-mt-2">
+                          No seating areas are available with your current preferences. Please adjust your selections.
+                        </small>
+                      } @else {
+                        <label
+                          class="tw-block tw-mb-2"
+                          for="region"
+                        >
+                          Regions
+                        </label>
+                        <p-select
+                          id="region"
+                          formControlName="region"
+                          [options]="regions"
+                          placeholder="Select Region"
+                          class="tw-w-full"
+                          optionDisabled="disabled"
+                        />
+                        @if (form.get('region')?.invalid && form.get('region')?.touched && !noRegionsAvailable) {
+                          <small class="tw-text-red-500 tw-block tw-mt-2">Por favor selecciona una región</small>
+                        }
                       }
                     </div>
                   </div>
@@ -251,7 +262,7 @@
               </p-step-panel>
             </p-step-panels>
 
-            <div class="tw-flex tw-justify-between tw-mt-auto tw-pt-6 tw-max-w-md tw-w-full tw-mx-auto">
+            <div class="tw-flex tw-justify-between tw-mt-auto tw-pt-6 tw-max-w-lg tw-w-full tw-mx-auto">
               <p-button
                 label="Back"
                 severity="secondary"

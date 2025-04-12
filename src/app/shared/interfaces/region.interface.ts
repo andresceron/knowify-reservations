@@ -6,4 +6,5 @@ export interface Region {
   capacity: number;
   allowChildren: boolean;
   allowSmoking: boolean;
+  disabled?: boolean;
 }
