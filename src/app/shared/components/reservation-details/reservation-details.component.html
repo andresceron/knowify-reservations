@@ -1,0 +1,43 @@
+<!-- src/app/shared/components/reservation-details/reservation-details.component.html -->
+<div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6">
+  <div class="tw-space-y-4">
+    <div>
+      <h2 class="tw-text-lg tw-font-semibold">Date & Time</h2>
+      <p>{{ reservation?.date }} at {{ reservation?.time }}</p>
+    </div>
+
+    <div>
+      <h2 class="tw-text-lg tw-font-semibold">Guests</h2>
+      <p>{{ reservation?.adults }} adults + {{ reservation?.children }} children</p>
+    </div>
+
+    <div>
+      <h2 class="tw-text-lg tw-font-semibold">Seating Area</h2>
+      <p>{{ regionName }}</p>
+    </div>
+  </div>
+
+  <div class="tw-space-y-4">
+    <div>
+      <h2 class="tw-text-lg tw-font-semibold">Contact Information</h2>
+      <p>{{ reservation?.name }}</p>
+      <p>{{ reservation?.email }}</p>
+      <p>{{ reservation?.phone }}</p>
+    </div>
+
+    <div>
+      <h2 class="tw-text-lg tw-font-semibold">Special Requests</h2>
+      @if (reservation?.isSmoking) {
+        <p>Smoking section requested</p>
+      }
+
+      @if (reservation?.isBirthday) {
+        <p>Birthday celebration for {{ reservation?.birthdayName }}</p>
+      }
+
+      @if (!reservation?.isSmoking && !reservation?.isBirthday) {
+        <p>No special requests</p>
+      }
+    </div>
+  </div>
+</div>

@@ -1,21 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { Router } from '@angular/router';
 import { ReservationStateService } from '../../shared/services/reservation.state.service';
 import { ReservationData } from '../../shared/interfaces/reservation.interface';
-import { REGION_OPTIONS } from '../../shared/types/region.type';
+import { ReservationDetailsComponent } from '../../shared/components/reservation-details/reservation-details.component';
 
 @Component({
   selector: 'app-review',
   standalone: true,
-  imports: [CommonModule, ButtonModule],
+  imports: [
+    ButtonModule,
+    ReservationDetailsComponent,
+  ],
   templateUrl: './review.component.html',
   styleUrl: './review.component.scss'
 })
 export class ReviewComponent implements OnInit {
   public reservation: ReservationData | null = null;
-  public regionName = '';
 
   constructor(
     private reservationState: ReservationStateService,
@@ -29,9 +30,6 @@ export class ReviewComponent implements OnInit {
       this.router.navigate(['/']);
       return;
     }
-
-    const region = REGION_OPTIONS.find(r => r.value === this.reservation?.region);
-    this.regionName = region?.label || '';
   }
 
   confirmReservation(): void {

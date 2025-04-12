@@ -10,7 +10,7 @@ export class ReservationStateService {
   private readonly _reservation = signal<ReservationData | null>(null);
   readonly reservation = computed(() => this._reservation());
 
-  setReservation(data: Partial<ReservationData>) {
+  public setReservation(data: Partial<ReservationData>) {
     const formattedData: ReservationData = {
       ...data,
       date: isDate(data.date) ? format(data.date, 'yyyy-MM-dd') : (data.date || ''),
@@ -19,7 +19,7 @@ export class ReservationStateService {
     this._reservation.set(formattedData);
   }
 
-  reset() {
+  public reset() {
     this._reservation.set(null);
   }
 
@@ -37,24 +37,12 @@ export class ReservationStateService {
     });
   }
 
-  readonly isValid = computed(() => {
-    const r = this._reservation();
-    if (!r) {
-      return false;
-    }
 
-    const totalGuests = (r.adults || 0) + (r.children || 0);
+  // public createReservation(data: ReservationData): Observable<ReservationData> {
+  //   // return this.http.post<ReservationData>(`${this.apiUrl}/reservations`, data);
+  // }
 
-    return (
-      !!r.date &&
-      !!r.time &&
-      !!r.name &&
-      !!r.email &&
-      !!r.phone &&
-      r.adults > 0 && r.adults <= 12 &&
-      r.children >= 0 && r.children <= 12 &&
-      totalGuests <= MAX_TOTAL_GUESTS &&
-      (!r.isBirthday || (r.isBirthday && r.birthdayName !== ''))
-    );
-  });
+  // public getReservationById(id: string): Observable<ReservationData> {
+  //   // return this.http.get<ReservationData>(`${this.apiUrl}/reservations/${id}`);
+  // }
 }

@@ -14,6 +14,19 @@ export const routes: Routes = [
     loadComponent: () => import('./routes/review/review.component').then(m => m.ReviewComponent),
   },
   {
+    path: 'confirmation',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./routes/confirmation/confirmation.component').then(m => m.ConfirmationComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./routes/confirmation/confirmation.component').then(m => m.ConfirmationComponent),
+      }
+    ]
+  },
+  {
     path: '**',
     redirectTo: 'reservation',
     pathMatch: 'full'

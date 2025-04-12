@@ -1,0 +1,27 @@
+<div class="tw-max-w-2xl tw-mx-auto tw-p-6 tw-bg-white tw-shadow-md tw-rounded-lg tw-mt-8">
+  @if (loading) {
+    <p>Loading your reservation...</p>
+  } @else {
+    @if (!reservation) {
+      <h2 class="tw-text-2xl tw-font-bold tw-mb-6">Reservation Not Found</h2>
+      <p>We couldn't find the reservation you're looking for.</p>
+    } @else {
+      <h2 class="tw-text-2xl tw-font-bold tw-mb-6">Reservation Confirmed!</h2>
+      <div class="tw-bg-green-50 tw-border tw-border-green-200 tw-rounded-md tw-p-4 tw-mb-6">
+        <p class="tw-text-green-800 tw-font-semibold">Your reservation has been confirmed.</p>
+        <p class="tw-text-green-700">
+          Confirmation Number: <span class="tw-font-bold">{{ confirmationNumber }}</span>
+        </p>
+      </div>
+
+      <app-reservation-details [reservation]="reservation"></app-reservation-details>
+    }
+  }
+
+  <div class="tw-mt-8 tw-flex tw-justify-center">
+    <p-button
+      label="Make a New Reservation"
+      (onClick)="createNewReservation()"
+    ></p-button>
+  </div>
+</div>
