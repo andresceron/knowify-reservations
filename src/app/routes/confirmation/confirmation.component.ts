@@ -30,7 +30,6 @@ export class ConfirmationComponent implements OnInit {
     const confirmationId = this.route.snapshot.paramMap.get('id');
     if (confirmationId) {
       this.fetchReservationById(confirmationId);
-      this.reservation = this.reservationState.reservation();
     } else {
       this.createNewReservation();
     }
@@ -42,6 +41,10 @@ export class ConfirmationComponent implements OnInit {
   }
 
   private fetchReservationById(id: string): void {
-    // TBD
+    this.reservationState.getReservationById(id).pipe(
+    ).subscribe((reservation) => {
+      this.reservation = reservation;
+      this.loading = false;
+    });
   }
 }

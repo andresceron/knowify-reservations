@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { parse } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -9,6 +9,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { StepperModule } from 'primeng/stepper';
+import { of, switchMap, tap } from 'rxjs';
 import { TIME_SLOT_OPTIONS } from '../../shared/types/time-slot.type';
 import { REGION_OPTIONS } from '../../shared/types/region.type';
 import { ReservationStateService } from '../../shared/services/reservation.state.service';
@@ -16,6 +17,7 @@ import { Router } from '@angular/router';
 import { AVAILABILITY_DATE_RANGE } from '../../shared/types/date-availability';
 import { GuestValidators } from '../../shared/validators/guest-validators';
 import { MAX_TOTAL_GUESTS } from '../../shared/constants/global.constants';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-reservation',
@@ -43,6 +45,7 @@ export class ReservationComponent implements OnInit {
   public currentStep = 0;
   public maxTotalGuests = MAX_TOTAL_GUESTS;
   public noRegionsAvailable = false;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private fb: FormBuilder,
@@ -69,9 +72,31 @@ export class ReservationComponent implements OnInit {
       birthdayName: [existingReservation?.birthdayName || ''],
     }, { validators: GuestValidators.maxTotalGuests(this.maxTotalGuests) });
 
+    if (!this.form.get('date')?.value) {
+      this.form.get('time')?.disable();
+    }
+
     if (existingReservation) {
       this.initReservation();
     }
+
+    this.form.get('date')?.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      tap(() => this.form.get('time')?.reset()),
+      tap((dateValue) => dateValue ? this.form.get('time')?.enable() : this.form.get('time')?.disable()),
+      switchMap((date: Date) => {
+        if (!date) {
+          return of([]);
+        }
+        const formattedDate = format(date, 'yyyy-MM-dd');
+        return this.reservationState.getAvailableTimes(formattedDate);
+      })
+    ).subscribe((availableTimes: string[]) => {
+      this.timeSlotsOptions = TIME_SLOT_OPTIONS.map(slot => ({
+        ...slot,
+        disabled: !availableTimes.includes(slot.value)
+      }));
+    });
   }
 
   public initReservation(): void {
