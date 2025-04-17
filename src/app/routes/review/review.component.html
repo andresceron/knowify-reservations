@@ -1,6 +1,15 @@
 <div class="tw-max-w-2xl tw-mx-auto tw-p-6 tw-bg-white tw-shadow-md tw-rounded-lg tw-mt-8">
   <h1 class="tw-text-2xl tw-font-bold tw-mb-6">Review Your Reservation</h1>
 
+  @if (!isAvailable) {
+    <p-message
+      severity="error"
+      [text]="errorMessage"
+      styleClass="tw-w-full tw-mb-4"
+    >
+    </p-message>
+  }
+
   <app-reservation-details [reservation]="reservation"></app-reservation-details>
 
   <div class="tw-mt-8 tw-flex tw-justify-between">
@@ -13,6 +22,7 @@
     <p-button
       label="Confirm Reservation"
       (onClick)="confirmReservation()"
+      [disabled]="!isAvailable || isSubmitting"
     ></p-button>
   </div>
 </div>
