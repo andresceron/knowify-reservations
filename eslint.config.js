@@ -19,6 +19,7 @@ module.exports = tseslint.config(
     },
     rules: {
       ...prettier.rules,
+      "@typescript-eslint/no-explicit-any": "warn",
       "@angular-eslint/directive-selector": [
         "error",
         { type: "attribute", prefix: "app", style: "camelCase" },
